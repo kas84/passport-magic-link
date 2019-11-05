@@ -86,16 +86,16 @@ class MagicLinkStrategy extends PassportStrategy {
       return this.fail(new Error('Mandatory user fields missing'))
     }
 
-    if (!this.verifyUserAfterToken) {
+    //if (!this.verifyUserAfterToken) {
       try {
         // Verify user
         if (this.passReqToCallbacks) {
-          user = await this.verifyUser(req, userFields)
+          user = await this.verifyUser(req, userFields,'requestToken')
         } else {
-          user = await this.verifyUser(userFields)
+          user = await this.verifyUser(userFields,'requestToken')
         }
       } catch (err) {
-        return this.error(err)
+        return this.fail(err)
       }
 
       if (!user) {
@@ -104,9 +104,9 @@ class MagicLinkStrategy extends PassportStrategy {
           400
         )
       }
-    } else {
-      user = userFields
-    }
+    //} else {
+    //  user = userFields
+    //}
 
     // Generate JWT
     const createToken = promisify(jwt.sign)
@@ -118,7 +118,7 @@ class MagicLinkStrategy extends PassportStrategy {
         {expiresIn: this.ttl}
       )
     } catch (err) {
-      return this.error(err)
+      return this.fail(err)
     }
 
     try {
@@ -129,7 +129,7 @@ class MagicLinkStrategy extends PassportStrategy {
         await this.sendToken(user, token)
       }
     } catch (err) {
-      return this.error(err)
+      return this.fail(err)
     }
 
     return this.pass({message: 'Token succesfully delivered'})
@@ -157,16 +157,16 @@ class MagicLinkStrategy extends PassportStrategy {
       return this.fail({message: err.message})
     }
 
-    if (this.verifyUserAfterToken) {
+    //if (this.verifyUserAfterToken) {
       try {
         // Verify user
         if (this.passReqToCallbacks) {
-          user = await this.verifyUser(req, user)
+          user = await this.verifyUser(req, user,'acceptToken')
         } else {
-          user = await this.verifyUser(user)
+          user = await this.verifyUser(user,'acceptToken')
         }
       } catch (err) {
-        return this.error(err)
+        return this.fail(err)
       }
 
       if (!user) {
@@ -175,7 +175,7 @@ class MagicLinkStrategy extends PassportStrategy {
           400
         )
       }
-    }
+    //}
 
     // Invalidate already used tokens
     const allowReuse = options.allowReuse || false
